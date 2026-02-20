@@ -1,26 +1,162 @@
-@import "tailwindcss";
+/* Font Imports */
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-serif: 'Source Serif 4', Georgia, Cambria, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Prose Editorial Styles - 일반 CSS로 작성 */
+.prose-editorial {
+  color: #1c1917;
+  line-height: 1.75;
+}
+
+.prose-editorial h2 {
+  font-family: 'Source Serif 4', Georgia, Cambria, serif;
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #1c1917;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e7e5e4;
+}
+
+.prose-editorial h3 {
+  font-family: 'Source Serif 4', Georgia, Cambria, serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #1c1917;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose-editorial p {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: #1c1917;
+  margin-bottom: 1.5rem;
+}
+
+.prose-editorial ul {
+  list-style-type: disc;
+  padding-left: 2rem;
+  margin-bottom: 2rem;
+  font-size: 1.125rem;
+  color: #1c1917;
+}
+
+.prose-editorial ul li {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-editorial ol {
+  list-style-type: decimal;
+  padding-left: 2rem;
+  margin-bottom: 2rem;
+  font-size: 1.125rem;
+  color: #1c1917;
+}
+
+.prose-editorial ol li {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-editorial blockquote {
+  border-left: 4px solid #6366f1;
+  padding-left: 1.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+  background-color: rgba(99, 102, 241, 0.1);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.prose-editorial blockquote p {
+  font-size: 1.125rem;
+  font-style: italic;
+  color: #1c1917;
+}
+
+.prose-editorial pre {
+  background-color: #1a1a1f;
+  color: #e4e4e7;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  font-family: 'JetBrains Mono', monospace;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.prose-editorial code {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.prose-editorial pre code {
+  background-color: transparent;
+  color: #e5e5e5;
+  padding: 0;
+}
+
+.prose-editorial a {
+  color: #6366f1;
+  text-decoration: none;
+}
+
+.prose-editorial a:hover {
+  text-decoration: underline;
+}
+
+.prose-editorial strong {
+  font-weight: 600;
+  color: #1c1917;
+}
+
+/* First Letter Drop Cap */
+.prose-editorial p:first-of-type::first-letter {
+  font-size: 3rem;
+  font-family: 'Source Serif 4', Georgia, Cambria, serif;
+  font-weight: 700;
+  float: left;
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  line-height: 1;
+}
+
+@media (min-width: 768px) {
+  .prose-editorial h2 {
+    font-size: 2.25rem;
+  }
+  
+  .prose-editorial h3 {
+    font-size: 1.875rem;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 }

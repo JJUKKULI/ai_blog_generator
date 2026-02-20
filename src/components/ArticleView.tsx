@@ -1,0 +1,180 @@
+'use client';
+
+import React, { useEffect, useState, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { CopyIcon, RefreshCwIcon, DownloadIcon, CheckIcon } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { cn } from '@/lib/utils';
+import { Article } from '@/types';
+
+interface ArticleViewProps {
+  article: Article;
+  onRegenerate?: () => void;
+}
+
+export function ArticleView({ article, onRegenerate }: ArticleViewProps) {
+  const [copied, setCopied] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!contentRef.current) return;
+      const rect = contentRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const docHeight = contentRef.current.scrollHeight;
+      const scrolled = Math.max(0, -rect.top);
+      const total = docHeight - windowHeight;
+      const percentage = Math.min(100, Math.max(0, (scrolled / total) * 100));
+      setProgress(percentage);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(article.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadMarkdown = () => {
+    const blob = new Blob([article.content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${article.title.replace(/\s+/g, '-')}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(date);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="bg-editorial-bg min-h-screen relative"
+    >
+      {/* Reading Progress Bar */}
+      <div className="sticky top-0 left-0 right-0 h-0.5 bg-editorial-border z-20">
+        <motion.div
+          className="h-full bg-accent"
+          style={{ width: `${progress}%` }}
+          transition={{ duration: 0.1 }}
+        />
+      </div>
+
+      {/* Floating Action Bar */}
+      <div className="sticky top-4 z-10 flex justify-end px-4 md:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="inline-flex items-center gap-1 bg-editorial-surface/90 backdrop-blur-sm rounded-lg p-1 shadow-editorial border border-editorial-border"
+        >
+          <button
+            onClick={handleCopy}
+            className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
+            title="클립보드에 복사"
+          >
+            {copied ? (
+              <CheckIcon className="w-4 h-4 text-green-600" />
+            ) : (
+              <CopyIcon className="w-4 h-4" />
+            )}
+          </button>
+
+          <button
+            onClick={handleDownloadMarkdown}
+            className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
+            title="마크다운 다운로드"
+          >
+            <DownloadIcon className="w-4 h-4" />
+          </button>
+
+          {onRegenerate && (
+            <button
+              onClick={onRegenerate}
+              className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
+              title="재생성"
+            >
+              <RefreshCwIcon className="w-4 h-4" />
+            </button>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Article Content */}
+      <div className="max-w-3xl mx-auto px-6 md:px-8 py-12 md:py-20" ref={contentRef}>
+        {/* Title */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-editorial-text leading-tight mb-6"
+        >
+          {article.title}
+        </motion.h1>
+
+        {/* Metadata Row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="flex flex-wrap items-center gap-2 text-sm text-editorial-muted mb-12 pb-8 border-b border-editorial-border"
+        >
+          <span className="font-medium text-editorial-text">{article.author}</span>
+          <span>·</span>
+          <span>{formatDate(article.date)}</span>
+          <span>·</span>
+          <span>{article.readingTime}분 읽기</span>
+          <span>·</span>
+          <span>{article.wordCount.toLocaleString()}자</span>
+          <span className="ml-auto px-2 py-0.5 bg-accent-subtle text-accent text-xs font-medium rounded">
+            {article.tone}
+          </span>
+        </motion.div>
+
+        {/* Content - Markdown Rendering */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="prose-editorial"
+        >
+          <ReactMarkdown>{article.content}</ReactMarkdown>
+        </motion.div>
+
+        {/* Hashtags */}
+        {article.hashtags && article.hashtags.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-12 pt-8 border-t border-editorial-border flex flex-wrap gap-2"
+          >
+            {article.hashtags.map((tag, index) => (
+              <span
+                key={index}
+                className="px-3 py-1 bg-accent-subtle text-accent text-sm font-medium rounded-full"
+              >
+                #{tag}
+              </span>
+            ))}
+          </motion.div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
