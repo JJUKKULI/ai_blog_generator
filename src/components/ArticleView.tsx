@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { CopyIcon, RefreshCwIcon, DownloadIcon, CheckIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CopyIcon, RefreshCwIcon, DownloadIcon, CheckIcon, EditIcon, SaveIcon, XIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 import { Article } from '@/types';
@@ -10,12 +10,21 @@ import { Article } from '@/types';
 interface ArticleViewProps {
   article: Article;
   onRegenerate?: () => void;
+  onUpdate?: (content: string, title: string) => void;
 }
 
-export function ArticleView({ article, onRegenerate }: ArticleViewProps) {
+export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProps) {
   const [copied, setCopied] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(article.content);
+  const [editedTitle, setEditedTitle] = useState(article.title);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setEditedContent(article.content);
+    setEditedTitle(article.title);
+  }, [article.content, article.title]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,13 +43,14 @@ export function ArticleView({ article, onRegenerate }: ArticleViewProps) {
   }, []);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(article.content);
+    await navigator.clipboard.writeText(isEditing ? editedContent : article.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDownloadMarkdown = () => {
-    const blob = new Blob([article.content], { type: 'text/markdown' });
+    const content = isEditing ? editedContent : article.content;
+    const blob = new Blob([content], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -49,6 +59,19 @@ export function ArticleView({ article, onRegenerate }: ArticleViewProps) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleSave = () => {
+    if (onUpdate) {
+      onUpdate(editedContent, editedTitle);
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditedContent(article.content);
+    setEditedTitle(article.title);
+    setIsEditing(false);
   };
 
   const formatDate = (date: Date) => {
@@ -75,57 +98,123 @@ export function ArticleView({ article, onRegenerate }: ArticleViewProps) {
         />
       </div>
 
-      {/* Floating Action Bar */}
-      <div className="sticky top-4 z-10 flex justify-end px-4 md:px-8">
+      {/* Floating Action Bar - 위치를 더 아래로 이동 (top-24) 및 보라색 그림자 */}
+      <div className="sticky top-24 z-10 flex justify-end px-4 md:px-8">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="inline-flex items-center gap-1 bg-editorial-surface/90 backdrop-blur-sm rounded-lg p-1 shadow-editorial border border-editorial-border"
+          className="inline-flex items-center gap-1 bg-editorial-surface/90 backdrop-blur-sm rounded-lg p-1 border border-editorial-border shadow-[0_0_15px_rgba(99,102,241,0.3)]"
         >
-          <button
-            onClick={handleCopy}
-            className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
-            title="클립보드에 복사"
-          >
-            {copied ? (
-              <CheckIcon className="w-4 h-4 text-green-600" />
+          <AnimatePresence mode="wait">
+            {isEditing ? (
+              <>
+                <motion.button
+                  key="save"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  onClick={handleSave}
+                  className="p-2 rounded-md text-accent hover:text-accent-hover hover:bg-accent-subtle transition-colors"
+                  title="저장"
+                >
+                  <SaveIcon className="w-4 h-4" />
+                </motion.button>
+                
+                <motion.button
+                  key="cancel"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  onClick={handleCancel}
+                  className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
+                  title="취소"
+                >
+                  <XIcon className="w-4 h-4" />
+                </motion.button>
+              </>
             ) : (
-              <CopyIcon className="w-4 h-4" />
+              <>
+                <motion.button
+                  key="edit"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  onClick={() => setIsEditing(true)}
+                  className="p-2 rounded-md text-editorial-muted hover:text-accent hover:bg-accent-subtle transition-colors"
+                  title="수정"
+                >
+                  <EditIcon className="w-4 h-4" />
+                </motion.button>
+
+                <motion.button
+                  key="copy"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  onClick={handleCopy}
+                  className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
+                  title="클립보드에 복사"
+                >
+                  {copied ? (
+                    <CheckIcon className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <CopyIcon className="w-4 h-4" />
+                  )}
+                </motion.button>
+
+                <motion.button
+                  key="download"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  onClick={handleDownloadMarkdown}
+                  className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
+                  title="마크다운 다운로드"
+                >
+                  <DownloadIcon className="w-4 h-4" />
+                </motion.button>
+
+                {onRegenerate && (
+                  <motion.button
+                    key="regenerate"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    onClick={onRegenerate}
+                    className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
+                    title="재생성"
+                  >
+                    <RefreshCwIcon className="w-4 h-4" />
+                  </motion.button>
+                )}
+              </>
             )}
-          </button>
-
-          <button
-            onClick={handleDownloadMarkdown}
-            className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
-            title="마크다운 다운로드"
-          >
-            <DownloadIcon className="w-4 h-4" />
-          </button>
-
-          {onRegenerate && (
-            <button
-              onClick={onRegenerate}
-              className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
-              title="재생성"
-            >
-              <RefreshCwIcon className="w-4 h-4" />
-            </button>
-          )}
+          </AnimatePresence>
         </motion.div>
       </div>
 
       {/* Article Content */}
       <div className="max-w-3xl mx-auto px-6 md:px-8 py-12 md:py-20" ref={contentRef}>
         {/* Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-editorial-text leading-tight mb-6"
-        >
-          {article.title}
-        </motion.h1>
+        {isEditing ? (
+          <input
+            type="text"
+            value={editedTitle}
+            onChange={(e) => setEditedTitle(e.target.value)}
+            className="w-full font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-editorial-text leading-tight mb-6 bg-transparent border-b-2 border-accent focus:outline-none focus:border-accent-hover pb-2"
+            placeholder="제목을 입력하세요..."
+          />
+        ) : (
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-editorial-text leading-tight mb-6"
+          >
+            {article.title}
+          </motion.h1>
+        )}
 
         {/* Metadata Row */}
         <motion.div
@@ -146,18 +235,33 @@ export function ArticleView({ article, onRegenerate }: ArticleViewProps) {
           </span>
         </motion.div>
 
-        {/* Content - Markdown Rendering */}
+        {/* Content - Editing or Viewing */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="prose-editorial"
         >
-          <ReactMarkdown>{article.content}</ReactMarkdown>
+          {isEditing ? (
+            <div className="relative">
+              <textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="w-full min-h-[600px] p-6 bg-white border-2 border-accent rounded-lg text-editorial-text font-mono text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 resize-y"
+                placeholder="마크다운 형식으로 작성하세요..."
+              />
+              <div className="mt-2 text-xs text-editorial-muted">
+                마크다운 형식을 지원합니다. 저장하면 바로 렌더링됩니다.
+              </div>
+            </div>
+          ) : (
+            <div className="prose-editorial">
+              <ReactMarkdown>{article.content}</ReactMarkdown>
+            </div>
+          )}
         </motion.div>
 
         {/* Hashtags */}
-        {article.hashtags && article.hashtags.length > 0 && (
+        {!isEditing && article.hashtags && article.hashtags.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
