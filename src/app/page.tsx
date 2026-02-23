@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlusIcon, HistoryIcon } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -9,13 +10,16 @@ import { ToneSelector } from '@/components/ToneSelector';
 import { ArticleView } from '@/components/ArticleView';
 import { KeywordInput } from '@/components/KeywordInput';
 import { HistorySidebar } from '@/components/HistorySidebar';
+import { UserMenu } from '@/components/UserMenu';
 import { Article } from '@/types';
 import { calculateReadingTime } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 
 const HISTORY_STORAGE_KEY = 'ai-blog-history';
 const MAX_HISTORY_ITEMS = 20;
 
 export default function Home() {
+  const { data: session } = useSession();
   const [topic, setTopic] = useState('');
   const [keywords, setKeywords] = useState<string[]>([]);
   const [tone, setTone] = useState('Professional');
@@ -25,40 +29,158 @@ export default function Home() {
   const [history, setHistory] = useState<Article[]>([]);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-  // Load history from localStorage on mount
+  // Load history from localStorage or Supabase on mount
   useEffect(() => {
-    const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
-    if (savedHistory) {
-      try {
-        const parsed = JSON.parse(savedHistory);
-        // Convert date strings back to Date objects
-        const historyWithDates = parsed.map((article: any) => ({
-          ...article,
-          date: new Date(article.date),
-        }));
-        setHistory(historyWithDates);
-      } catch (error) {
-        console.error('Failed to load history:', error);
+    if (session?.user) {
+      // 로그인 상태: Supabase에서 불러오기
+      loadFromSupabase();
+    } else {
+      // 비로그인 상태: localStorage에서 불러오기
+      const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+      if (savedHistory) {
+        try {
+          const parsed = JSON.parse(savedHistory);
+          const historyWithDates = parsed.map((article: any) => ({
+            ...article,
+            date: new Date(article.date),
+          }));
+          setHistory(historyWithDates);
+        } catch (error) {
+          console.error('Failed to load history:', error);
+        }
       }
     }
-  }, []);
+  }, [session]);
 
-  // Save history to localStorage whenever it changes
-  const saveToHistory = (article: Article) => {
-    const updatedHistory = [article, ...history].slice(0, MAX_HISTORY_ITEMS);
-    setHistory(updatedHistory);
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+  const loadFromSupabase = async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false })
+        .limit(MAX_HISTORY_ITEMS);
+
+      if (error) throw error;
+
+      if (data) {
+        const articles: Article[] = data.map((item) => ({
+          id: item.id,
+          title: item.title,
+          content: item.content,
+          date: new Date(item.created_at),
+          tone: item.tone,
+          topic: item.topic,
+          keywords: item.keywords,
+          author: item.author,
+          readingTime: item.reading_time,
+          wordCount: item.word_count,
+          metaDescription: item.meta_description,
+          hashtags: item.hashtags,
+        }));
+        setHistory(articles);
+      }
+    } catch (error) {
+      console.error('Failed to load from Supabase:', error);
+    }
   };
 
-  const clearHistory = () => {
-    setHistory([]);
-    localStorage.removeItem(HISTORY_STORAGE_KEY);
+  // Save history to localStorage or Supabase
+  const saveToHistory = async (article: Article) => {
+    if (session?.user?.id) {
+      // 로그인 상태: Supabase에 저장
+      try {
+        await supabase.from('articles').insert({
+          id: article.id,
+          user_id: session.user.id,
+          title: article.title,
+          content: article.content,
+          topic: article.topic,
+          keywords: article.keywords,
+          tone: article.tone,
+          author: article.author,
+          reading_time: article.readingTime,
+          word_count: article.wordCount,
+          meta_description: article.metaDescription,
+          hashtags: article.hashtags,
+        });
+
+        // 분석 이벤트 기록
+        await supabase.from('analytics').insert({
+          id: crypto.randomUUID(),
+          user_id: session.user.id,
+          event_type: 'article_generated',
+          metadata: {
+            topic: article.topic,
+            tone: article.tone,
+            word_count: article.wordCount,
+          },
+        });
+
+        // 히스토리 다시 불러오기
+        await loadFromSupabase();
+      } catch (error) {
+        console.error('Failed to save to Supabase:', error);
+      }
+    } else {
+      // 비로그인 상태: localStorage에 저장
+      const updatedHistory = [article, ...history].slice(0, MAX_HISTORY_ITEMS);
+      setHistory(updatedHistory);
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+    }
   };
 
-  const deleteArticle = (articleId: string) => {
-    const updatedHistory = history.filter(article => article.id !== articleId);
-    setHistory(updatedHistory);
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+  const clearHistory = async () => {
+    if (session?.user?.id) {
+      // 로그인 상태: Supabase에서 삭제
+      try {
+        await supabase
+          .from('articles')
+          .delete()
+          .eq('user_id', session.user.id);
+        
+        setHistory([]);
+      } catch (error) {
+        console.error('Failed to clear Supabase history:', error);
+      }
+    } else {
+      // 비로그인 상태: localStorage에서 삭제
+      setHistory([]);
+      localStorage.removeItem(HISTORY_STORAGE_KEY);
+    }
+  };
+
+  const deleteArticle = async (articleId: string) => {
+    if (session?.user?.id) {
+      // 로그인 상태: Supabase에서 삭제
+      try {
+        await supabase
+          .from('articles')
+          .delete()
+          .eq('id', articleId)
+          .eq('user_id', session.user.id);
+        
+        // 분석 이벤트 기록
+        await supabase.from('analytics').insert({
+          id: crypto.randomUUID(),
+          user_id: session.user.id,
+          event_type: 'article_deleted',
+          metadata: { article_id: articleId },
+        });
+
+        // 히스토리 다시 불러오기
+        await loadFromSupabase();
+      } catch (error) {
+        console.error('Failed to delete from Supabase:', error);
+      }
+    } else {
+      // 비로그인 상태: localStorage에서 삭제
+      const updatedHistory = history.filter(article => article.id !== articleId);
+      setHistory(updatedHistory);
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+    }
     
     // 현재 보고 있는 글이 삭제된 경우 초기화
     if (currentArticle?.id === articleId) {
@@ -133,7 +255,7 @@ export default function Home() {
     }
   };
 
-  const handleUpdateArticle = (newContent: string, newTitle: string) => {
+  const handleUpdateArticle = async (newContent: string, newTitle: string) => {
     if (currentArticle) {
       const updatedArticle: Article = {
         ...currentArticle,
@@ -144,12 +266,45 @@ export default function Home() {
       };
       setCurrentArticle(updatedArticle);
       
-      // 히스토리에도 업데이트된 내용 반영
-      const updatedHistory = history.map(article => 
-        article.id === updatedArticle.id ? updatedArticle : article
-      );
-      setHistory(updatedHistory);
-      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+      if (session?.user?.id) {
+        // 로그인 상태: Supabase 업데이트
+        try {
+          await supabase
+            .from('articles')
+            .update({
+              title: newTitle,
+              content: newContent,
+              word_count: newContent.length,
+              reading_time: calculateReadingTime(newContent),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', updatedArticle.id)
+            .eq('user_id', session.user.id);
+
+          // 분석 이벤트 기록
+          await supabase.from('analytics').insert({
+            id: crypto.randomUUID(),
+            user_id: session.user.id,
+            event_type: 'article_edited',
+            metadata: {
+              article_id: updatedArticle.id,
+              word_count: newContent.length,
+            },
+          });
+
+          // 히스토리 다시 불러오기
+          await loadFromSupabase();
+        } catch (error) {
+          console.error('Failed to update in Supabase:', error);
+        }
+      } else {
+        // 비로그인 상태: localStorage 업데이트
+        const updatedHistory = history.map(article => 
+          article.id === updatedArticle.id ? updatedArticle : article
+        );
+        setHistory(updatedHistory);
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+      }
     }
   };
 
@@ -180,7 +335,7 @@ export default function Home() {
         onClick={() => setIsHistoryOpen(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed top-6 right-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors"
+        className="fixed top-6 right-20 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors"
         title="히스토리"
       >
         <HistoryIcon className="w-5 h-5" />
@@ -190,6 +345,11 @@ export default function Home() {
           </span>
         )}
       </motion.button>
+
+      {/* User Menu */}
+      <div className="fixed top-6 right-6 z-30">
+        <UserMenu />
+      </div>
 
       {/* History Sidebar */}
       <HistorySidebar
