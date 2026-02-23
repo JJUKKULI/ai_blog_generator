@@ -12,7 +12,7 @@ const config: Config = {
         dark: {
           bg: '#0f0f13',
           surface: '#1a1a1f',
-          border: 'rgba(255,255,255,0.08)',
+          border: 'rgba(255,255,255,0.12)', // 더 진한 테두리로 변경 (0.08 → 0.12)
           text: '#e4e4e7',
           muted: '#71717a',
         },
@@ -22,7 +22,7 @@ const config: Config = {
           surface: '#ffffff',
           text: '#1c1917',
           muted: '#78716c',
-          border: '#e7e5e4',
+          border: '#d6d3d1', // 더 진한 회색으로 변경
         },
         // Accent colors
         accent: {

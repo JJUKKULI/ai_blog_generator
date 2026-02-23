@@ -1,15 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PlusIcon } from 'lucide-react';
+import { PlusIcon, HistoryIcon } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { ToneSelector } from '@/components/ToneSelector';
 import { ArticleView } from '@/components/ArticleView';
 import { KeywordInput } from '@/components/KeywordInput';
+import { HistorySidebar } from '@/components/HistorySidebar';
 import { Article } from '@/types';
 import { calculateReadingTime } from '@/lib/utils';
+
+const HISTORY_STORAGE_KEY = 'ai-blog-history';
+const MAX_HISTORY_ITEMS = 20;
 
 export default function Home() {
   const [topic, setTopic] = useState('');
@@ -18,6 +22,49 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentArticle, setCurrentArticle] = useState<Article | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<Article[]>([]);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
+  // Load history from localStorage on mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (savedHistory) {
+      try {
+        const parsed = JSON.parse(savedHistory);
+        // Convert date strings back to Date objects
+        const historyWithDates = parsed.map((article: any) => ({
+          ...article,
+          date: new Date(article.date),
+        }));
+        setHistory(historyWithDates);
+      } catch (error) {
+        console.error('Failed to load history:', error);
+      }
+    }
+  }, []);
+
+  // Save history to localStorage whenever it changes
+  const saveToHistory = (article: Article) => {
+    const updatedHistory = [article, ...history].slice(0, MAX_HISTORY_ITEMS);
+    setHistory(updatedHistory);
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem(HISTORY_STORAGE_KEY);
+  };
+
+  const deleteArticle = (articleId: string) => {
+    const updatedHistory = history.filter(article => article.id !== articleId);
+    setHistory(updatedHistory);
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+    
+    // 현재 보고 있는 글이 삭제된 경우 초기화
+    if (currentArticle?.id === articleId) {
+      setCurrentArticle(null);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!topic.trim()) return;
@@ -64,6 +111,7 @@ export default function Home() {
       };
 
       setCurrentArticle(article);
+      saveToHistory(article); // Save to history
     } catch (err) {
       console.error('Generation error:', err);
       setError(err instanceof Error ? err.message : '글 생성에 실패했습니다.');
@@ -85,6 +133,33 @@ export default function Home() {
     }
   };
 
+  const handleUpdateArticle = (newContent: string, newTitle: string) => {
+    if (currentArticle) {
+      const updatedArticle: Article = {
+        ...currentArticle,
+        title: newTitle,
+        content: newContent,
+        wordCount: newContent.length,
+        readingTime: calculateReadingTime(newContent),
+      };
+      setCurrentArticle(updatedArticle);
+      
+      // 히스토리에도 업데이트된 내용 반영
+      const updatedHistory = history.map(article => 
+        article.id === updatedArticle.id ? updatedArticle : article
+      );
+      setHistory(updatedHistory);
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+    }
+  };
+
+  const handleSelectArticle = (article: Article) => {
+    setCurrentArticle(article);
+    setTopic(article.topic);
+    setKeywords(article.keywords || []);
+    setTone(article.tone);
+  };
+
   return (
     <div className="min-h-screen bg-dark-bg font-sans">
       {/* Floating New Topic Button */}
@@ -99,6 +174,32 @@ export default function Home() {
           <PlusIcon className="w-5 h-5" />
         </motion.button>
       )}
+
+      {/* History Button */}
+      <motion.button
+        onClick={() => setIsHistoryOpen(true)}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="fixed top-6 right-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors"
+        title="히스토리"
+      >
+        <HistoryIcon className="w-5 h-5" />
+        {history.length > 0 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white text-xs flex items-center justify-center rounded-full">
+            {history.length > 9 ? '9+' : history.length}
+          </span>
+        )}
+      </motion.button>
+
+      {/* History Sidebar */}
+      <HistorySidebar
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        history={history}
+        onSelectArticle={handleSelectArticle}
+        onClearHistory={clearHistory}
+        onDeleteArticle={deleteArticle}
+      />
 
       {/* Generator Section */}
       <motion.section
@@ -223,6 +324,7 @@ export default function Home() {
               key={currentArticle.id}
               article={currentArticle}
               onRegenerate={handleRegenerate}
+              onUpdate={handleUpdateArticle}
             />
           </motion.div>
         )}
