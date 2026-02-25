@@ -2,10 +2,21 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CopyIcon, RefreshCwIcon, DownloadIcon, CheckIcon, EditIcon, SaveIcon, XIcon } from 'lucide-react';
+import { 
+  CopyIcon, 
+  RefreshCwIcon, 
+  DownloadIcon, 
+  CheckIcon, 
+  EditIcon, 
+  SaveIcon, 
+  XIcon,
+  TrendingUpIcon
+} from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 import { Article } from '@/types';
+import { analyzeSEO, SEOAnalysis } from '@/lib/seo';
+import { SEODashboard } from './SEODashboard';
 
 interface ArticleViewProps {
   article: Article;
@@ -19,12 +30,25 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(article.content);
   const [editedTitle, setEditedTitle] = useState(article.title);
+  const [showSEO, setShowSEO] = useState(false);
+  const [seoAnalysis, setSeoAnalysis] = useState<SEOAnalysis | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setEditedContent(article.content);
     setEditedTitle(article.title);
   }, [article.content, article.title]);
+
+  // SEO 분석 수행
+  useEffect(() => {
+    const analysis = analyzeSEO(
+      article.title,
+      article.content,
+      article.keywords,
+      article.metaDescription
+    );
+    setSeoAnalysis(analysis);
+  }, [article.title, article.content, article.keywords, article.metaDescription]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -135,6 +159,34 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
               </>
             ) : (
               <>
+                {/* SEO 점수 표시 버튼 */}
+                {seoAnalysis && (
+                  <motion.button
+                    key="seo"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    onClick={() => setShowSEO(!showSEO)}
+                    className={cn(
+                      "p-2 rounded-md transition-colors flex items-center gap-1",
+                      showSEO
+                        ? "text-accent bg-accent-subtle"
+                        : "text-editorial-muted hover:text-accent hover:bg-accent-subtle"
+                    )}
+                    title="SEO 분석"
+                  >
+                    <TrendingUpIcon className="w-4 h-4" />
+                    <span className={cn(
+                      "text-xs font-bold",
+                      seoAnalysis.score >= 80 ? "text-green-500" :
+                      seoAnalysis.score >= 60 ? "text-yellow-500" :
+                      "text-red-500"
+                    )}>
+                      {seoAnalysis.score}
+                    </span>
+                  </motion.button>
+                )}
+
                 <motion.button
                   key="edit"
                   initial={{ scale: 0.8, opacity: 0 }}
@@ -196,6 +248,21 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
 
       {/* Article Content */}
       <div className="max-w-3xl mx-auto px-6 md:px-8 py-12 md:py-20" ref={contentRef}>
+        {/* SEO Dashboard */}
+        <AnimatePresence>
+          {showSEO && seoAnalysis && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mb-12"
+            >
+              <SEODashboard analysis={seoAnalysis} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Title */}
         {isEditing ? (
           <input
