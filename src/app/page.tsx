@@ -13,7 +13,6 @@ import { HistorySidebar } from '@/components/HistorySidebar';
 import { UserMenu } from '@/components/UserMenu';
 import { Article } from '@/types';
 import { calculateReadingTime } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
 
 const HISTORY_STORAGE_KEY = 'ai-blog-history';
 const MAX_HISTORY_ITEMS = 20;
@@ -55,18 +54,25 @@ export default function Home() {
   const loadFromSupabase = async () => {
     if (!session?.user?.id) return;
 
+    // Supabase 환경 변수 확인
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.log('Supabase not configured, using localStorage');
+      return;
+    }
+
     try {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-        .limit(MAX_HISTORY_ITEMS);
+      console.log('🔄 API를 통해 Supabase에서 글 로드...');
+      
+      const response = await fetch('/api/articles');
+      
+      if (!response.ok) {
+        throw new Error('API 로드 실패');
+      }
 
-      if (error) throw error;
+      const { data } = await response.json();
 
-      if (data) {
-        const articles: Article[] = data.map((item) => ({
+      if (data && data.length > 0) {
+        const articles: Article[] = data.map((item: any) => ({
           id: item.id,
           title: item.title,
           content: item.content,
@@ -81,51 +87,80 @@ export default function Home() {
           hashtags: item.hashtags,
         }));
         setHistory(articles);
+        console.log('✅ Supabase에서 로드 성공:', articles.length, '개');
+      } else {
+        console.log('ℹ️ Supabase에 저장된 글 없음');
+        setHistory([]);
       }
     } catch (error) {
-      console.error('Failed to load from Supabase:', error);
+      console.warn('❌ Supabase 로드 실패, localStorage 사용:', error);
+      // Supabase 실패 시 localStorage 사용
+      const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+      if (savedHistory) {
+        try {
+          const parsed = JSON.parse(savedHistory);
+          const historyWithDates = parsed.map((article: any) => ({
+            ...article,
+            date: new Date(article.date),
+          }));
+          setHistory(historyWithDates);
+        } catch (e) {
+          console.error('Failed to load localStorage:', e);
+        }
+      }
     }
   };
 
   // Save history to localStorage or Supabase
   const saveToHistory = async (article: Article) => {
-    if (session?.user?.id) {
-      // 로그인 상태: Supabase에 저장
+    if (session?.user?.id && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      // 로그인 상태 + Supabase 설정됨: API Route로 저장
       try {
-        await supabase.from('articles').insert({
-          id: article.id,
-          user_id: session.user.id,
-          title: article.title,
-          content: article.content,
-          topic: article.topic,
-          keywords: article.keywords,
-          tone: article.tone,
-          author: article.author,
-          reading_time: article.readingTime,
-          word_count: article.wordCount,
-          meta_description: article.metaDescription,
-          hashtags: article.hashtags,
-        });
-
-        // 분석 이벤트 기록
-        await supabase.from('analytics').insert({
-          id: crypto.randomUUID(),
-          user_id: session.user.id,
-          event_type: 'article_generated',
-          metadata: {
+        console.log('🔄 API를 통해 Supabase에 저장 시도...');
+        console.log('Session user ID:', session.user.id);
+        console.log('Article ID:', article.id);
+        
+        const response = await fetch('/api/articles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: article.id,
+            title: article.title,
+            content: article.content,
             topic: article.topic,
+            keywords: article.keywords,
             tone: article.tone,
+            author: article.author,
+            reading_time: article.readingTime,
             word_count: article.wordCount,
-          },
+            meta_description: article.metaDescription,
+            hashtags: article.hashtags,
+          }),
         });
 
+        console.log('API 응답 상태:', response.status);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('❌ API 응답 에러:', errorData);
+          throw new Error(`API 저장 실패: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Supabase에 저장 성공!', result);
+        
         // 히스토리 다시 불러오기
         await loadFromSupabase();
       } catch (error) {
-        console.error('Failed to save to Supabase:', error);
+        console.error('❌ Supabase 저장 실패, localStorage 사용:', error);
+        // Supabase 실패 시 localStorage에 저장
+        const updatedHistory = [article, ...history].slice(0, MAX_HISTORY_ITEMS);
+        setHistory(updatedHistory);
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
       }
     } else {
-      // 비로그인 상태: localStorage에 저장
+      console.log('📦 localStorage에 저장 (비로그인 또는 Supabase 미설정)');
+      // 비로그인 상태 또는 Supabase 미설정: localStorage에 저장
       const updatedHistory = [article, ...history].slice(0, MAX_HISTORY_ITEMS);
       setHistory(updatedHistory);
       localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
@@ -133,17 +168,23 @@ export default function Home() {
   };
 
   const clearHistory = async () => {
-    if (session?.user?.id) {
-      // 로그인 상태: Supabase에서 삭제
+    if (session?.user?.id && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      // 로그인 상태: API로 Supabase에서 삭제
       try {
-        await supabase
-          .from('articles')
-          .delete()
-          .eq('user_id', session.user.id);
+        // 모든 글 ID 가져오기
+        const articleIds = history.map(a => a.id);
+        
+        // 각 글 삭제
+        for (const id of articleIds) {
+          await fetch(`/api/articles?id=${id}`, {
+            method: 'DELETE',
+          });
+        }
         
         setHistory([]);
+        console.log('✅ 모든 글 삭제 완료');
       } catch (error) {
-        console.error('Failed to clear Supabase history:', error);
+        console.error('❌ Supabase 삭제 실패:', error);
       }
     } else {
       // 비로그인 상태: localStorage에서 삭제
@@ -153,27 +194,23 @@ export default function Home() {
   };
 
   const deleteArticle = async (articleId: string) => {
-    if (session?.user?.id) {
-      // 로그인 상태: Supabase에서 삭제
+    if (session?.user?.id && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      // 로그인 상태: API로 Supabase에서 삭제
       try {
-        await supabase
-          .from('articles')
-          .delete()
-          .eq('id', articleId)
-          .eq('user_id', session.user.id);
-        
-        // 분석 이벤트 기록
-        await supabase.from('analytics').insert({
-          id: crypto.randomUUID(),
-          user_id: session.user.id,
-          event_type: 'article_deleted',
-          metadata: { article_id: articleId },
+        const response = await fetch(`/api/articles?id=${articleId}`, {
+          method: 'DELETE',
         });
 
+        if (!response.ok) {
+          throw new Error('API 삭제 실패');
+        }
+
+        console.log('✅ 글 삭제 성공');
+        
         // 히스토리 다시 불러오기
         await loadFromSupabase();
       } catch (error) {
-        console.error('Failed to delete from Supabase:', error);
+        console.error('❌ Supabase 삭제 실패:', error);
       }
     } else {
       // 비로그인 상태: localStorage에서 삭제
@@ -218,7 +255,7 @@ export default function Home() {
       const readingTime = calculateReadingTime(data.content);
 
       const article: Article = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: crypto.randomUUID(),  // UUID 생성
         title: data.title,
         content: data.content,
         date: new Date(),
@@ -266,36 +303,31 @@ export default function Home() {
       };
       setCurrentArticle(updatedArticle);
       
-      if (session?.user?.id) {
-        // 로그인 상태: Supabase 업데이트
+      if (session?.user?.id && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        // 로그인 상태: API로 Supabase 업데이트
         try {
-          await supabase
-            .from('articles')
-            .update({
+          const response = await fetch('/api/articles', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: updatedArticle.id,
               title: newTitle,
               content: newContent,
               word_count: newContent.length,
               reading_time: calculateReadingTime(newContent),
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', updatedArticle.id)
-            .eq('user_id', session.user.id);
-
-          // 분석 이벤트 기록
-          await supabase.from('analytics').insert({
-            id: crypto.randomUUID(),
-            user_id: session.user.id,
-            event_type: 'article_edited',
-            metadata: {
-              article_id: updatedArticle.id,
-              word_count: newContent.length,
-            },
+            }),
           });
 
+          if (!response.ok) {
+            throw new Error('API 업데이트 실패');
+          }
+
+          console.log('✅ 글 수정 성공');
+          
           // 히스토리 다시 불러오기
           await loadFromSupabase();
         } catch (error) {
-          console.error('Failed to update in Supabase:', error);
+          console.error('❌ Supabase 업데이트 실패:', error);
         }
       } else {
         // 비로그인 상태: localStorage 업데이트
@@ -335,7 +367,7 @@ export default function Home() {
         onClick={() => setIsHistoryOpen(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed top-6 right-20 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors"
+        className="fixed top-6 right-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors"
         title="히스토리"
       >
         <HistoryIcon className="w-5 h-5" />
@@ -346,8 +378,8 @@ export default function Home() {
         )}
       </motion.button>
 
-      {/* User Menu */}
-      <div className="fixed top-6 right-6 z-30">
+      {/* User Menu - 히스토리 왼쪽에 배치 */}
+      <div className="fixed top-6 right-20 z-30">
         <UserMenu />
       </div>
 

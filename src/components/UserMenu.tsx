@@ -97,7 +97,7 @@ export function UserMenu() {
                 <button
                   onClick={() => {
                     setIsOpen(false);
-                    // TODO: 통계 페이지로 이동
+                    window.location.href = '/analytics';
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2 text-dark-text hover:bg-dark-bg rounded-lg transition-colors text-left"
                 >
