@@ -11,6 +11,7 @@ import { ArticleView } from '@/components/ArticleView';
 import { KeywordInput } from '@/components/KeywordInput';
 import { HistorySidebar } from '@/components/HistorySidebar';
 import { UserMenu } from '@/components/UserMenu';
+import { AdvancedSettingsPanel, AdvancedSettings } from '@/components/AdvancedSettingsPanel';
 import { Article } from '@/types';
 import { calculateReadingTime } from '@/lib/utils';
 
@@ -27,6 +28,12 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<Article[]>([]);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
+    audience: 'intermediate',
+    length: 'medium',
+    structure: 'balanced',
+    seoLevel: 'basic',
+  });
 
   // Load history from localStorage or Supabase on mount
   useEffect(() => {
@@ -241,6 +248,11 @@ export default function Home() {
           topic,
           keywords,
           tone,
+          // 고급 설정
+          audience: advancedSettings.audience,
+          length: advancedSettings.length,
+          structure: advancedSettings.structure,
+          seoLevel: advancedSettings.seoLevel,
         }),
       });
 
@@ -355,7 +367,7 @@ export default function Home() {
           onClick={handleNewTopic}
           whileHover={{ rotate: 90 }}
           transition={{ duration: 0.2 }}
-          className="fixed top-6 left-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.15)]"
+          className="fixed top-6 left-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.22)]"
           title="새 글 작성"
         >
           <PlusIcon className="w-5 h-5" />
@@ -367,7 +379,7 @@ export default function Home() {
         onClick={() => setIsHistoryOpen(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed top-6 right-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.15)]"
+        className="fixed top-6 right-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.22)]"
         title="히스토리"
       >
         <HistoryIcon className="w-5 h-5" />
@@ -423,7 +435,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="bg-dark-surface border border-dark-border rounded-xl p-4 md:p-6 shadow-[0_0_20px_rgba(99,102,241,0.15)]"
+            className="bg-dark-surface border border-dark-border rounded-xl p-4 md:p-6 shadow-[0_0_20px_rgba(99,102,241,0.22)]"
           >
             {/* Topic Input */}
             <div className="mb-4">
@@ -441,6 +453,12 @@ export default function Home() {
             <div className="mb-4">
               <KeywordInput keywords={keywords} onChange={setKeywords} />
             </div>
+
+            {/* Advanced Settings */}
+            <AdvancedSettingsPanel 
+              settings={advancedSettings}
+              onChange={setAdvancedSettings}
+            />
 
             {/* Controls Row */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">

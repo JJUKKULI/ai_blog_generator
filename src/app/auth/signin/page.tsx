@@ -25,7 +25,7 @@ export default function SignIn() {
         </div>
 
         {/* 로그인 카드 */}
-        <div className="bg-dark-surface border border-dark-border rounded-xl p-8 shadow-[0_0_20px_rgba(99,102,241,0.15)]">
+        <div className="bg-dark-surface border border-dark-border rounded-xl p-8 shadow-[0_0_20px_rgba(99,102,241,0.22)]">
           <h2 className="text-xl font-semibold text-dark-text mb-6 text-center">
             시작하기
           </h2>
@@ -78,15 +78,12 @@ export default function SignIn() {
         {/* 기능 설명 */}
         <div className="mt-8 grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-2xl mb-1">☁️</div>
             <p className="text-xs text-dark-muted">클라우드<br />동기화</p>
           </div>
           <div>
-            <div className="text-2xl mb-1">📊</div>
             <p className="text-xs text-dark-muted">사용<br />통계</p>
           </div>
           <div>
-            <div className="text-2xl mb-1">🔒</div>
             <p className="text-xs text-dark-muted">안전한<br />저장</p>
           </div>
         </div>

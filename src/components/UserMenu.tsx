@@ -19,7 +19,7 @@ export function UserMenu() {
     return (
       <button
         onClick={() => signIn()}
-        className="flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg transition-colors font-medium shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+        className="flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg transition-colors font-medium shadow-[0_0_20px_rgba(99,102,241,0.22)]"
       >
         <LogInIcon className="w-4 h-4" />
         로그인
@@ -32,7 +32,7 @@ export function UserMenu() {
       {/* 프로필 버튼 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-dark-surface border border-dark-border hover:border-accent/50 rounded-lg transition-colors shadow-[0_0_20px_rgba(99,102,241,0.15)]"
+        className="flex items-center gap-2 px-3 py-2 bg-dark-surface border border-dark-border hover:border-accent/50 rounded-lg transition-colors shadow-[0_0_20px_rgba(99,102,241,0.22)]"
       >
         {session.user?.image ? (
           <img
