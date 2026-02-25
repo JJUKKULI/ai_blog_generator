@@ -114,7 +114,7 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
       className="bg-editorial-bg min-h-screen relative"
     >
       {/* Reading Progress Bar */}
-      <div className="sticky top-0 left-0 right-0 h-0.5 bg-editorial-border z-20">
+      <div className="sticky top-0 left-0 right-0 h-1 bg-editorial-border z-20">
         <motion.div
           className="h-full bg-accent"
           style={{ width: `${progress}%` }}
@@ -128,7 +128,7 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="inline-flex items-center gap-1 bg-editorial-surface/90 backdrop-blur-sm rounded-lg p-1 border border-editorial-border shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+          className="inline-flex items-center gap-1 bg-editorial-surface/90 backdrop-blur-sm rounded-lg p-1 border border-editorial-border shadow-[0_0_15px_rgba(99,102,241,0.4)]"
         >
           <AnimatePresence mode="wait">
             {isEditing ? (
@@ -205,7 +205,7 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.8, opacity: 0 }}
                   onClick={handleCopy}
-                  className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
+                  className="p-2 rounded-md text-editorial-muted hover:text-accent hover:bg-accent-subtle transition-colors"
                   title="클립보드에 복사"
                 >
                   {copied ? (
@@ -221,7 +221,7 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.8, opacity: 0 }}
                   onClick={handleDownloadMarkdown}
-                  className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
+                  className="p-2 rounded-md text-editorial-muted hover:text-accent hover:bg-accent-subtle transition-colors"
                   title="마크다운 다운로드"
                 >
                   <DownloadIcon className="w-4 h-4" />
@@ -234,7 +234,7 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.8, opacity: 0 }}
                     onClick={onRegenerate}
-                    className="p-2 rounded-md text-editorial-muted hover:text-editorial-text hover:bg-editorial-bg transition-colors"
+                    className="p-2 rounded-md text-editorial-muted hover:text-accent hover:bg-accent-subtle transition-colors"
                     title="재생성"
                   >
                     <RefreshCwIcon className="w-4 h-4" />
@@ -269,7 +269,7 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
             type="text"
             value={editedTitle}
             onChange={(e) => setEditedTitle(e.target.value)}
-            className="w-full font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-editorial-text leading-tight mb-6 bg-transparent border-b-2 border-accent focus:outline-none focus:border-accent-hover pb-2"
+            className="w-full text-4xl md:text-5xl lg:text-6xl font-bold text-editorial-text leading-tight mb-6 bg-transparent border-b-2 border-accent focus:outline-none focus:border-accent-hover pb-2"
             placeholder="제목을 입력하세요..."
           />
         ) : (
@@ -277,7 +277,7 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-editorial-text leading-tight mb-6"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-editorial-text leading-tight mb-6"
           >
             {article.title}
           </motion.h1>

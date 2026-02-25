@@ -280,9 +280,9 @@ export function getSEOGrade(score: number): {
   color: string;
   label: string;
 } {
-  if (score >= 90) return { grade: 'A', color: 'text-green-500', label: '매우 우수' };
-  if (score >= 80) return { grade: 'B', color: 'text-blue-500', label: '우수' };
-  if (score >= 70) return { grade: 'C', color: 'text-yellow-500', label: '보통' };
-  if (score >= 60) return { grade: 'D', color: 'text-orange-500', label: '미흡' };
-  return { grade: 'F', color: 'text-red-500', label: '개선 필요' };
+  if (score >= 90) return { grade: 'A', color: 'text-accent', label: '매우 우수' };
+  if (score >= 80) return { grade: 'B', color: 'text-accent', label: '우수' };
+  if (score >= 70) return { grade: 'C', color: 'text-accent-light', label: '보통' };
+  if (score >= 60) return { grade: 'D', color: 'text-yellow-400', label: '미흡' };
+  return { grade: 'F', color: 'text-red-400', label: '개선 필요' };
 }

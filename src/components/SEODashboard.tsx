@@ -26,16 +26,18 @@ export function SEODashboard({ analysis }: SEODashboardProps) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-dark-surface border border-dark-border rounded-xl p-6"
+        className="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-[0_0_20px_rgba(99,102,241,0.15)]"
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-dark-text flex items-center gap-2">
             <TrendingUpIcon className="w-5 h-5 text-accent" />
             SEO 종합 점수
           </h3>
-          <div className="flex items-center gap-2">
-            <span className={`text-3xl font-bold ${color}`}>{grade}</span>
-            <span className="text-dark-muted text-sm">({label})</span>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end">
+              <span className={`text-4xl font-bold ${color}`}>{grade}</span>
+              <span className="text-dark-muted text-xs mt-0.5">{label}</span>
+            </div>
           </div>
         </div>
 
@@ -144,7 +146,7 @@ function SEOCard({ icon, title, score, details, suggestions }: SEOCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-dark-surface border border-dark-border rounded-lg p-4"
+      className="bg-dark-surface border border-dark-border rounded-lg p-4 shadow-[0_0_20px_rgba(99,102,241,0.15)]"
     >
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-3">

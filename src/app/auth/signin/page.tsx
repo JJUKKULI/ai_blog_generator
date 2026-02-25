@@ -15,7 +15,7 @@ export default function SignIn() {
       >
         {/* 로고/제목 */}
         <div className="text-center mb-8">
-          <h1 className="font-serif text-4xl font-bold text-dark-text mb-2">
+          <h1 className="text-4xl font-bold text-dark-text mb-2">
             AI 블로그 생성기
           </h1>
           <p className="text-dark-muted">
@@ -25,7 +25,7 @@ export default function SignIn() {
         </div>
 
         {/* 로그인 카드 */}
-        <div className="bg-dark-surface border border-dark-border rounded-xl p-8 shadow-dark">
+        <div className="bg-dark-surface border border-dark-border rounded-xl p-8 shadow-[0_0_20px_rgba(99,102,241,0.15)]">
           <h2 className="text-xl font-semibold text-dark-text mb-6 text-center">
             시작하기
           </h2>

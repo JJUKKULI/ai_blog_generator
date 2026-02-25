@@ -355,7 +355,7 @@ export default function Home() {
           onClick={handleNewTopic}
           whileHover={{ rotate: 90 }}
           transition={{ duration: 0.2 }}
-          className="fixed top-6 left-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors"
+          className="fixed top-6 left-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.15)]"
           title="새 글 작성"
         >
           <PlusIcon className="w-5 h-5" />
@@ -367,7 +367,7 @@ export default function Home() {
         onClick={() => setIsHistoryOpen(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed top-6 right-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors"
+        className="fixed top-6 right-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.15)]"
         title="히스토리"
       >
         <HistoryIcon className="w-5 h-5" />
@@ -406,11 +406,11 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className={`text-center mb-8 ${
+            className={`text-center mb-10 ${
               currentArticle ? 'scale-90 origin-top' : ''
             } transition-transform duration-500`}
           >
-            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-dark-text mb-4 leading-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-dark-text mb-4 leading-tight">
               무엇에 대해 작성하시겠습니까?
             </h1>
             <p className="text-dark-muted text-lg">
@@ -423,7 +423,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="bg-dark-surface border border-dark-border rounded-xl p-4 md:p-6"
+            className="bg-dark-surface border border-dark-border rounded-xl p-4 md:p-6 shadow-[0_0_20px_rgba(99,102,241,0.15)]"
           >
             {/* Topic Input */}
             <div className="mb-4">

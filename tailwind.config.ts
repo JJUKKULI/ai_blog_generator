@@ -33,8 +33,15 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ['"Source Serif 4"', 'Georgia', 'Cambria', 'serif'],
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        sans: [
+          'Pretendard',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'system-ui',
+          'Roboto',
+          'sans-serif'
+        ],
+        serif: ['Pretendard', 'serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {

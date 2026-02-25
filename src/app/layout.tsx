@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { SessionProvider } from '@/components/SessionProvider';
-
-const inter = Inter({
-  variable: '--font-inter',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: 'AI 기술 블로그 생성기',
@@ -20,7 +14,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
+      <head>
+        <link
+          rel="stylesheet"
+          as="style"
+          crossOrigin="anonymous"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+        />
+      </head>
+      <body className="antialiased" suppressHydrationWarning>
         <SessionProvider>
           {children}
         </SessionProvider>
