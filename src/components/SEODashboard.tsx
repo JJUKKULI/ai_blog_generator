@@ -26,7 +26,7 @@ export function SEODashboard({ analysis }: SEODashboardProps) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-[0_0_20px_rgba(99,102,241,0.15)]"
+        className="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-[0_0_20px_rgba(99,102,241,0.6)]"
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-dark-text flex items-center gap-2">
@@ -36,7 +36,7 @@ export function SEODashboard({ analysis }: SEODashboardProps) {
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-end">
               <span className={`text-4xl font-bold ${color}`}>{grade}</span>
-              <span className="text-dark-muted text-xs mt-0.5">{label}</span>
+              <span className="text-gray-400 text-xs mt-0.5">{label}</span>
             </div>
           </div>
         </div>
@@ -57,9 +57,9 @@ export function SEODashboard({ analysis }: SEODashboardProps) {
           />
         </div>
         <div className="flex justify-between mt-2">
-          <span className="text-xs text-dark-muted">0</span>
+          <span className="text-xs text-gray-400">0</span>
           <span className="text-sm font-medium text-dark-text">{analysis.score}/100</span>
-          <span className="text-xs text-dark-muted">100</span>
+          <span className="text-xs text-gray-400">100</span>
         </div>
       </motion.div>
 
@@ -146,7 +146,7 @@ function SEOCard({ icon, title, score, details, suggestions }: SEOCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-dark-surface border border-dark-border rounded-lg p-4 shadow-[0_0_20px_rgba(99,102,241,0.15)]"
+      className="bg-dark-surface border border-dark-border rounded-lg p-4 shadow-[0_0_20px_rgba(99,102,241,0.6)]"
     >
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-3">
@@ -161,7 +161,7 @@ function SEOCard({ icon, title, score, details, suggestions }: SEOCardProps) {
       <div className="space-y-2 mb-3">
         {details.map((detail, index) => (
           <div key={index} className="flex items-center justify-between text-sm">
-            <span className="text-dark-muted">{detail.label}</span>
+            <span className="text-gray-400">{detail.label}</span>
             <div className="flex items-center gap-1">
               <span className="text-dark-text">{detail.value}</span>
               {detail.optimal ? (
@@ -181,7 +181,7 @@ function SEOCard({ icon, title, score, details, suggestions }: SEOCardProps) {
             <InfoIcon className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
               {suggestions.map((suggestion, index) => (
-                <p key={index} className="text-xs text-dark-muted">{suggestion}</p>
+                <p key={index} className="text-xs text-gray-400">{suggestion}</p>
               ))}
             </div>
           </div>
