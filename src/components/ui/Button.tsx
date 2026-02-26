@@ -4,10 +4,15 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd'> {
+interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'ghost' | 'dark';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
+  children?: React.ReactNode;
+  className?: string;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export function Button({
@@ -17,7 +22,8 @@ export function Button({
   isLoading,
   children,
   disabled,
-  ...props
+  onClick,
+  type = 'button',
 }: ButtonProps) {
   const variants = {
     primary:
@@ -37,15 +43,17 @@ export function Button({
 
   return (
     <motion.button
+      type={type}
+      onClick={onClick}
       whileHover={
         !disabled && !isLoading
           ? { scale: 1.02 }
-          : {}
+          : undefined
       }
       whileTap={
         !disabled && !isLoading
           ? { scale: 0.98 }
-          : {}
+          : undefined
       }
       className={cn(
         'inline-flex items-center justify-center rounded-lg font-medium transition-colors',
@@ -56,7 +64,6 @@ export function Button({
         className
       )}
       disabled={disabled || isLoading}
-      {...props}
     >
       {isLoading ? (
         <div className="flex items-center gap-2">
