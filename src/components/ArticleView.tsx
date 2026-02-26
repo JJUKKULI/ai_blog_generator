@@ -45,7 +45,7 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
       article.title,
       article.content,
       article.keywords || [],
-      article.metaDescription
+      article.metaDescription || null
     );
     setSeoAnalysis(analysis);
   }, [article.title, article.content, article.keywords, article.metaDescription]);

@@ -6,12 +6,12 @@ export interface Article {
   date: Date;
   tone: string;
   topic: string;
-  keywords?: string[];
+  keywords: string[];        // required - 기본값 [] 보장
   author: string;
   readingTime: number;
   wordCount: number;
-  metaDescription?: string;
-  hashtags?: string[];
+  metaDescription: string;   // required - 기본값 '' 보장
+  hashtags: string[];        // required - 기본값 [] 보장
 }
 
 // API 요청 타입
