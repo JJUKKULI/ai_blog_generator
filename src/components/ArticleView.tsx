@@ -44,7 +44,7 @@ export function ArticleView({ article, onRegenerate, onUpdate }: ArticleViewProp
     const analysis = analyzeSEO(
       article.title,
       article.content,
-      article.keywords,
+      article.keywords || [],
       article.metaDescription
     );
     setSeoAnalysis(analysis);
