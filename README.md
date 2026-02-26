@@ -4,21 +4,47 @@ GPT를 활용한 기술 블로그 자동 생성 서비스입니다.
 
 ## ✨ 주요 기능
 
-- 📝 AI 기반 기술 블로그 자동 생성
-- 🎨 세련된 UI/UX (framer-motion 애니메이션)
-- 📊 마크다운 형식의 구조화된 콘텐츠
-- 💻 코드 예시 자동 포함
-- 🏷️ 해시태그 및 SEO 메타 설명 생성
-- 📥 마크다운 파일 다운로드
-- 📋 클립보드 복사
+### 🎯 핵심 기능
+- 📝 **AI 기반 기술 블로그 자동 생성** (GPT-4o)
+- 🎨 **고급 설정** (대상 독자, 글 길이, 구조, SEO 레벨)
+- 📊 **실시간 SEO 분석** (점수, 개선 제안)
+- 🔐 **OAuth 로그인** (Google, GitHub)
+- ☁️ **클라우드 동기화** (Supabase)
+
+### 📈 SEO 기능
+- 실시간 SEO 점수 분석 (A-F 등급)
+- 제목, 키워드 밀도, 메타 디스크립션 최적화
+- 가독성 및 문서 구조 분석
+- 맞춤형 개선 제안
+
+### ⚙️ 고급 설정
+- **대상 독자**: 초보자 / 중급자 / 전문가
+- **글 길이**: 짧음(400-600자) / 보통(800-1200자) / 김(1500-2000자)
+- **구조**: 리스트형 / 스토리형 / 기술문서형 / 균형형
+- **SEO**: 기본 / 고급 최적화
+
+### 🎨 UI/UX
+- 세련된 다크 테마
+- Framer Motion 애니메이션
+- 반응형 디자인
+- 읽기 진행률 표시
+
+### 💾 데이터 관리
+- 히스토리 자동 저장
+- 클라우드 동기화 (로그인 시)
+- 마크다운 다운로드
+- 클립보드 복사
 
 ## 🛠️ 기술 스택
 
-- **Frontend**: Next.js 16 (App Router), React 19, TypeScript
-- **Styling**: Tailwind CSS
+- **Frontend**: Next.js 15 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS, Pretendard 폰트
 - **Animation**: Framer Motion
 - **AI**: OpenAI GPT-4o
+- **Auth**: NextAuth.js (Google, GitHub OAuth)
+- **Database**: Supabase (PostgreSQL)
 - **Markdown**: React Markdown
+- **Deploy**: Vercel
 
 ## 📦 설치 및 실행
 
@@ -139,18 +165,79 @@ ai-blog-generator/
 
 ## 🚀 배포
 
-### Vercel 배포
+### Vercel 배포 (권장)
 
-1. [Vercel](https://vercel.com)에 로그인
-2. 프로젝트 Import
-3. 환경 변수 설정 (`OPENAI_API_KEY`)
-4. Deploy
+**빠른 배포:**
+```bash
+# 1. GitHub에 푸시
+git push origin main
+
+# 2. Vercel에서 Import
+# https://vercel.com → New Project → Import
+
+# 3. 환경 변수 설정 후 Deploy
+```
+
+**상세 가이드:**
+- 📖 [VERCEL_DEPLOY_GUIDE.md](./VERCEL_DEPLOY_GUIDE.md) - 완벽 배포 가이드
+- ⚡ [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) - 5분 빠른 배포
+
+---
 
 ## 🔐 환경 변수
 
-| 변수명 | 설명 | 필수 여부 |
-|--------|------|----------|
-| `OPENAI_API_KEY` | OpenAI API 키 | 필수 |
+### 필수 환경 변수
+
+| 변수명 | 설명 | 예시 |
+|--------|------|------|
+| `OPENAI_API_KEY` | OpenAI API 키 | `sk-proj-...` |
+| `NEXTAUTH_SECRET` | NextAuth 암호화 키 (32자+) | `random-string-32-chars` |
+| `NEXTAUTH_URL` | 배포 URL | `https://your-app.vercel.app` |
+| `GOOGLE_CLIENT_ID` | Google OAuth 클라이언트 ID | `xxx.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth 비밀키 | `GOCSPX-...` |
+| `GITHUB_ID` | GitHub OAuth 앱 ID | `Iv1...` |
+| `GITHUB_SECRET` | GitHub OAuth 비밀키 | `...` |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL | `https://xxx.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Anon 키 | `eyJhbGc...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Service Role 키 | `eyJhbGc...` |
+
+### 로컬 개발 설정
+
+`.env.local` 파일 생성:
+
+```env
+# OpenAI
+OPENAI_API_KEY=sk-proj-your-key-here
+
+# NextAuth
+NEXTAUTH_SECRET=generate-random-32-char-string
+NEXTAUTH_URL=http://localhost:3000
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# GitHub OAuth
+GITHUB_ID=your-github-app-id
+GITHUB_SECRET=your-github-app-secret
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+**NEXTAUTH_SECRET 생성:**
+```bash
+# 방법 1 (권장)
+openssl rand -base64 32
+
+# 방법 2
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+# 방법 3 (온라인)
+# https://generate-secret.vercel.app/32
+```
 
 ## 📄 라이선스
 
