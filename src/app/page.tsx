@@ -49,6 +49,9 @@ export default function Home() {
           const historyWithDates = parsed.map((article: any) => ({
             ...article,
             date: new Date(article.date),
+            keywords: article.keywords || [],
+            metaDescription: article.metaDescription || '',
+            hashtags: article.hashtags || [],
           }));
           setHistory(historyWithDates);
         } catch (error) {
@@ -86,12 +89,12 @@ export default function Home() {
           date: new Date(item.created_at),
           tone: item.tone,
           topic: item.topic,
-          keywords: item.keywords,
+          keywords: item.keywords || [],
           author: item.author,
           readingTime: item.reading_time,
           wordCount: item.word_count,
-          metaDescription: item.meta_description,
-          hashtags: item.hashtags,
+          metaDescription: item.meta_description || '',
+          hashtags: item.hashtags || [],
         }));
         setHistory(articles);
         console.log('✅ Supabase에서 로드 성공:', articles.length, '개');
@@ -109,6 +112,9 @@ export default function Home() {
           const historyWithDates = parsed.map((article: any) => ({
             ...article,
             date: new Date(article.date),
+            keywords: article.keywords || [],
+            metaDescription: article.metaDescription || '',
+            hashtags: article.hashtags || [],
           }));
           setHistory(historyWithDates);
         } catch (e) {
@@ -273,12 +279,12 @@ export default function Home() {
         date: new Date(),
         tone,
         topic,
-        keywords,
+        keywords: keywords || [],
         author: 'AI Writer',
         readingTime,
         wordCount,
-        metaDescription: data.metaDescription,
-        hashtags: data.hashtags,
+        metaDescription: data.metaDescription || '',
+        hashtags: data.hashtags || [],
       };
 
       setCurrentArticle(article);

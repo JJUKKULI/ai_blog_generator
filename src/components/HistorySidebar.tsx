@@ -104,7 +104,7 @@ export function HistorySidebar({
                           {formatDate(article.date)}
                         </p>
                         <div className="flex flex-wrap gap-1">
-                          {article.keywords?.slice(0, 3).map((keyword, idx) => (
+                          {article.keywords.slice(0, 3).map((keyword, idx) => (
                             <span
                               key={idx}
                               className="px-2 py-0.5 bg-accent-subtle text-accent text-xs rounded"
