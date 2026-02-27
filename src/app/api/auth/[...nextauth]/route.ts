@@ -20,12 +20,10 @@ export const authOptions: NextAuthOptions = {
 
       // Supabase가 설정되지 않았으면 그냥 로그인 허용
       if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-        console.log('✅ Supabase 미설정 - 로그인만 허용');
         return true;
       }
 
       try {
-        console.log('🔄 Supabase에 사용자 저장 시도:', user.email);
 
         // 기존 사용자 확인 (email로)
         const { data: existingUser, error: selectError } = await supabaseAdmin
@@ -35,7 +33,6 @@ export const authOptions: NextAuthOptions = {
           .single();
 
         if (selectError && selectError.code !== 'PGRST116') {
-          console.error('❌ 사용자 조회 오류:', selectError);
         }
 
         // user.id는 Google/GitHub에서 숫자 문자열로 올 수 있어서 UUID로 변환 필요
@@ -56,9 +53,7 @@ export const authOptions: NextAuthOptions = {
             .eq('email', user.email);
 
           if (updateError) {
-            console.error('❌ 사용자 업데이트 오류:', updateError);
           } else {
-            console.log('✅ 사용자 업데이트 성공');
           }
         } else {
           // 새 사용자면 새 UUID 생성
@@ -74,9 +69,7 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (insertError) {
-            console.error('❌ 사용자 생성 오류:', insertError);
           } else {
-            console.log('✅ 사용자 생성 성공:', userId);
           }
         }
 
@@ -93,22 +86,16 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (analyticsError) {
-          console.error('❌ 분석 기록 오류:', analyticsError);
         } else {
-          console.log('✅ 로그인 이벤트 기록 성공');
         }
 
         return true;
       } catch (error) {
-        console.error('❌ signIn 콜백 오류:', error);
         // 에러가 있어도 로그인은 허용 (localStorage 사용 가능하도록)
         return true;
       }
     },
     async session({ session, token }) {
-      console.log('🔑 session callback 호출됨');
-      console.log('Token sub:', token.sub);
-      console.log('Session user email:', session.user?.email);
       
       if (session.user?.email) {
         // Supabase에서 실제 UUID 조회
@@ -121,20 +108,15 @@ export const authOptions: NextAuthOptions = {
               .single();
             
             if (error) {
-              console.error('❌ session callback에서 user 조회 에러:', error);
             } else if (data) {
               session.user.id = data.id;
-              console.log('✅ session.user.id 설정됨:', data.id);
             } else {
-              console.warn('⚠️ user 데이터 없음');
             }
           } catch (error) {
-            console.error('❌ session callback 전체 에러:', error);
           }
         }
       }
       
-      console.log('최종 session.user.id:', session.user?.id);
       return session;
     },
   },

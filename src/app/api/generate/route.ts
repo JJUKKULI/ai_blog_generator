@@ -228,7 +228,6 @@ export async function POST(req: NextRequest) {
       seoLevel,
     });
 
-    console.log('🚀 프롬프트 생성 완료:', {
       audience: audience || 'intermediate',
       length: length || 'medium',
       structure: structure || 'balanced',
@@ -262,7 +261,6 @@ export async function POST(req: NextRequest) {
       throw new Error('Invalid response from OpenAI');
     }
 
-    console.log('✅ 글 생성 성공:', {
       title: result.title,
       contentLength: result.content.length,
       hashtags: result.hashtags?.length || 0,
@@ -275,7 +273,6 @@ export async function POST(req: NextRequest) {
       metaDescription: result.metaDescription || '',
     });
   } catch (error) {
-    console.error('❌ API Error:', error);
     return NextResponse.json(
       { 
         error: '글 생성에 실패했습니다. 잠시 후 다시 시도해주세요.',

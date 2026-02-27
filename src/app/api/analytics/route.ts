@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: articles || [] });
   } catch (error) {
-    console.error('GET /api/analytics error:', error);
     return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
   }
 }

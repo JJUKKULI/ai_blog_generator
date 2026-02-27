@@ -56,7 +56,6 @@ export default function Analytics() {
 
     if (supabaseConfigured && session?.user?.id) {
       try {
-        console.log('🔄 API를 통해 통계 로드...');
         
         const response = await fetch('/api/analytics');
         
@@ -66,21 +65,17 @@ export default function Analytics() {
           if (data && data.length > 0) {
             articles = data;
             setDataSource('supabase');
-            console.log('✅ Supabase 데이터 로드:', data.length, '개');
           } else {
             // Supabase에 데이터 없으면 localStorage 확인
             articles = loadFromLocalStorage();
             setDataSource('localStorage');
-            console.log('📦 localStorage 데이터 사용:', articles.length, '개');
           }
         } else {
-          console.warn('⚠️ API 응답 실패:', response.status);
           // API 실패 시 localStorage 사용
           articles = loadFromLocalStorage();
           setDataSource('localStorage');
         }
       } catch (error) {
-        console.warn('⚠️ API 오류, localStorage 사용:', error);
         articles = loadFromLocalStorage();
         setDataSource('localStorage');
       }
@@ -88,7 +83,6 @@ export default function Analytics() {
       // Supabase 미설정
       articles = loadFromLocalStorage();
       setDataSource('localStorage');
-      console.log('📦 localStorage 데이터 사용 (Supabase 미설정):', articles.length, '개');
     }
 
     // 통계 계산
@@ -120,7 +114,6 @@ export default function Analytics() {
         }));
       }
     } catch (error) {
-      console.error('❌ localStorage 로드 실패:', error);
     }
     return [];
   };
