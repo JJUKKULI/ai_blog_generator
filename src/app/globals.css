@@ -78,18 +78,31 @@
 .prose-editorial blockquote {
   border-left: 4px solid #6366f1;
   padding-left: 1.5rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-right: 1rem;
   margin-top: 2.5rem;
   margin-bottom: 2.5rem;
   background-color: rgba(99, 102, 241, 0.1);
   border-radius: 0 0.5rem 0.5rem 0;
+  display: flex;
+  align-items: center;
 }
 
 .prose-editorial blockquote p {
   font-size: 1.125rem;
   font-style: italic;
   color: #1c1917;
+  margin: 0;
+}
+
+/* blockquote 안의 첫 글자 - 크기만 일반, 굵기는 유지 */
+.prose-editorial blockquote p::first-letter {
+  font-size: 1.125rem !important;
+  line-height: 1 !important;
+  float: none !important;
+  font-weight: 700 !important;        /* 굵게 유지! */
+  margin-right: 0 !important;
 }
 
 .prose-editorial pre {
