@@ -2,7 +2,7 @@
 
 import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Github, Chrome } from 'lucide-react';
+import { Github, Chrome, Cloud, BarChart3, Lock } from 'lucide-react';
 
 export default function SignIn() {
   return (
@@ -77,13 +77,16 @@ export default function SignIn() {
 
         {/* 기능 설명 */}
         <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-          <div>
+          <div className="flex flex-col items-center gap-2">
+            <Cloud className="w-6 h-6 text-accent" />
             <p className="text-xs text-dark-muted">클라우드<br />동기화</p>
           </div>
-          <div>
+          <div className="flex flex-col items-center gap-2">
+            <BarChart3 className="w-6 h-6 text-accent" />
             <p className="text-xs text-dark-muted">사용<br />통계</p>
           </div>
-          <div>
+          <div className="flex flex-col items-center gap-2">
+            <Lock className="w-6 h-6 text-accent" />
             <p className="text-xs text-dark-muted">안전한<br />저장</p>
           </div>
         </div>

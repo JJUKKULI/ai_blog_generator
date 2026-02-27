@@ -1,0 +1,10 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="#6366F1"/>
+  
+  <!-- AI Icon -->
+  <path d="M12 9L10 23H13L15 9H12Z" fill="white"/>
+  <path d="M19 9L17 23H20L22 9H19Z" fill="white"/>
+  <circle cx="11.5" cy="8" r="1.5" fill="white"/>
+  <circle cx="20.5" cy="8" r="1.5" fill="white"/>
+</svg>
