@@ -11,6 +11,7 @@ import { ArticleView } from '@/components/ArticleView';
 import { KeywordInput } from '@/components/KeywordInput';
 import { HistorySidebar } from '@/components/HistorySidebar';
 import { UserMenu } from '@/components/UserMenu';
+import { ScrollToTop } from '@/components/ScrollToTop';
 import { AdvancedSettingsPanel, AdvancedSettings } from '@/components/AdvancedSettingsPanel';
 import { Article } from '@/types';
 import { calculateReadingTime } from '@/lib/utils';
@@ -55,7 +56,6 @@ export default function Home() {
           }));
           setHistory(historyWithDates);
         } catch (error) {
-          console.error('Failed to load history:', error);
         }
       }
     }
@@ -66,12 +66,10 @@ export default function Home() {
 
     // Supabase 환경 변수 확인
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.log('Supabase not configured, using localStorage');
       return;
     }
 
     try {
-      console.log('🔄 API를 통해 Supabase에서 글 로드...');
       
       const response = await fetch('/api/articles');
       
@@ -97,13 +95,10 @@ export default function Home() {
           hashtags: item.hashtags || [],
         }));
         setHistory(articles);
-        console.log('✅ Supabase에서 로드 성공:', articles.length, '개');
       } else {
-        console.log('ℹ️ Supabase에 저장된 글 없음');
         setHistory([]);
       }
     } catch (error) {
-      console.warn('❌ Supabase 로드 실패, localStorage 사용:', error);
       // Supabase 실패 시 localStorage 사용
       const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
       if (savedHistory) {
@@ -118,7 +113,6 @@ export default function Home() {
           }));
           setHistory(historyWithDates);
         } catch (e) {
-          console.error('Failed to load localStorage:', e);
         }
       }
     }
@@ -129,9 +123,6 @@ export default function Home() {
     if (session?.user?.id && process.env.NEXT_PUBLIC_SUPABASE_URL) {
       // 로그인 상태 + Supabase 설정됨: API Route로 저장
       try {
-        console.log('🔄 API를 통해 Supabase에 저장 시도...');
-        console.log('Session user ID:', session.user.id);
-        console.log('Article ID:', article.id);
         
         const response = await fetch('/api/articles', {
           method: 'POST',
@@ -151,28 +142,23 @@ export default function Home() {
           }),
         });
 
-        console.log('API 응답 상태:', response.status);
         
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('❌ API 응답 에러:', errorData);
           throw new Error(`API 저장 실패: ${response.status}`);
         }
 
         const result = await response.json();
-        console.log('✅ Supabase에 저장 성공!', result);
         
         // 히스토리 다시 불러오기
         await loadFromSupabase();
       } catch (error) {
-        console.error('❌ Supabase 저장 실패, localStorage 사용:', error);
         // Supabase 실패 시 localStorage에 저장
         const updatedHistory = [article, ...history].slice(0, MAX_HISTORY_ITEMS);
         setHistory(updatedHistory);
         localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
       }
     } else {
-      console.log('📦 localStorage에 저장 (비로그인 또는 Supabase 미설정)');
       // 비로그인 상태 또는 Supabase 미설정: localStorage에 저장
       const updatedHistory = [article, ...history].slice(0, MAX_HISTORY_ITEMS);
       setHistory(updatedHistory);
@@ -195,9 +181,7 @@ export default function Home() {
         }
         
         setHistory([]);
-        console.log('✅ 모든 글 삭제 완료');
       } catch (error) {
-        console.error('❌ Supabase 삭제 실패:', error);
       }
     } else {
       // 비로그인 상태: localStorage에서 삭제
@@ -218,12 +202,10 @@ export default function Home() {
           throw new Error('API 삭제 실패');
         }
 
-        console.log('✅ 글 삭제 성공');
         
         // 히스토리 다시 불러오기
         await loadFromSupabase();
       } catch (error) {
-        console.error('❌ Supabase 삭제 실패:', error);
       }
     } else {
       // 비로그인 상태: localStorage에서 삭제
@@ -290,7 +272,6 @@ export default function Home() {
       setCurrentArticle(article);
       saveToHistory(article); // Save to history
     } catch (err) {
-      console.error('Generation error:', err);
       setError(err instanceof Error ? err.message : '글 생성에 실패했습니다.');
     } finally {
       setIsGenerating(false);
@@ -340,12 +321,10 @@ export default function Home() {
             throw new Error('API 업데이트 실패');
           }
 
-          console.log('✅ 글 수정 성공');
           
           // 히스토리 다시 불러오기
           await loadFromSupabase();
         } catch (error) {
-          console.error('❌ Supabase 업데이트 실패:', error);
         }
       } else {
         // 비로그인 상태: localStorage 업데이트
@@ -367,18 +346,23 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-dark-bg font-sans">
-      {/* Logo - 왼쪽 상단에 항상 표시 */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed top-6 left-6 z-30"
-      >
-        <img 
-          src="/logo.png" 
-          alt="AI Blog Generator" 
-          className="w-10 h-10 object-contain"
-        />
-      </motion.div>
+      {/* Logo - 왼쪽 상단에 기본 화면에만 표시 */}
+      {!currentArticle && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-6 left-6 z-30"
+        >
+          <div className="w-10 h-10 flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="AI Blog Generator" 
+              className="w-full h-full object-contain"
+            />
+          </div>
+        </motion.div>
+      )}
 
       {/* Floating New Topic Button */}
       {currentArticle && (
@@ -386,7 +370,7 @@ export default function Home() {
           onClick={handleNewTopic}
           whileHover={{ rotate: 90 }}
           transition={{ duration: 0.2 }}
-          className="fixed top-6 left-20 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.22)]"
+          className="fixed top-6 left-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.22)]"
           title="새 글 작성"
         >
           <PlusIcon className="w-5 h-5" />
@@ -558,6 +542,9 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
     </div>
   );
 }
