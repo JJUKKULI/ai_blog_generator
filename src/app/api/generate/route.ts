@@ -228,12 +228,6 @@ export async function POST(req: NextRequest) {
       seoLevel,
     });
 
-      audience: audience || 'intermediate',
-      length: length || 'medium',
-      structure: structure || 'balanced',
-      seoLevel: seoLevel || 'basic',
-    });
-
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
@@ -260,11 +254,6 @@ export async function POST(req: NextRequest) {
     if (!result.title || !result.content) {
       throw new Error('Invalid response from OpenAI');
     }
-
-      title: result.title,
-      contentLength: result.content.length,
-      hashtags: result.hashtags?.length || 0,
-    });
 
     return NextResponse.json({
       title: result.title,
