@@ -367,13 +367,26 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-dark-bg font-sans">
+      {/* Logo - 왼쪽 상단에 항상 표시 */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed top-6 left-6 z-30"
+      >
+        <img 
+          src="/logo.png" 
+          alt="AI Blog Generator" 
+          className="w-10 h-10 object-contain"
+        />
+      </motion.div>
+
       {/* Floating New Topic Button */}
       {currentArticle && (
         <motion.button
           onClick={handleNewTopic}
           whileHover={{ rotate: 90 }}
           transition={{ duration: 0.2 }}
-          className="fixed top-6 left-6 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.22)]"
+          className="fixed top-6 left-20 z-30 w-10 h-10 flex items-center justify-center bg-dark-surface border border-dark-border rounded-lg text-dark-muted hover:text-dark-text hover:border-accent/50 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.22)]"
           title="새 글 작성"
         >
           <PlusIcon className="w-5 h-5" />
