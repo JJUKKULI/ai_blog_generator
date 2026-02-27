@@ -13,7 +13,7 @@ interface ToneSelectorProps {
 
 export function ToneSelector({ value, onChange }: ToneSelectorProps) {
   return (
-    <div className="inline-flex items-center bg-dark-bg/50 rounded-lg p-1 border border-dark-border">
+    <div className="grid grid-cols-2 md:flex md:flex-row gap-1 bg-dark-bg/50 rounded-lg p-1 border border-dark-border w-full md:w-auto">
       {TONES.map((tone) => {
         const isActive = value === tone;
         return (
@@ -21,7 +21,7 @@ export function ToneSelector({ value, onChange }: ToneSelectorProps) {
             key={tone}
             onClick={() => onChange(tone)}
             className={cn(
-              'relative px-4 py-2 text-sm font-medium rounded-md transition-colors',
+              'relative px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap',
               isActive ? 'text-white' : 'text-dark-muted hover:text-dark-text'
             )}
             type="button"
