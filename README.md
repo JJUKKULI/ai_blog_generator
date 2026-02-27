@@ -37,13 +37,14 @@ GPT를 활용한 기술 블로그 자동 생성 서비스입니다.
 
 ## 🛠️ 기술 스택
 
-- **Frontend**: Next.js 15 (App Router), React 19, TypeScript
+- **Frontend**: Next.js 16 (App Router), React 19, TypeScript
 - **Styling**: Tailwind CSS, Pretendard 폰트
 - **Animation**: Framer Motion
 - **AI**: OpenAI GPT-4o
 - **Auth**: NextAuth.js (Google, GitHub OAuth)
 - **Database**: Supabase (PostgreSQL)
 - **Markdown**: React Markdown
+- **Icons**: Lucide React
 - **Deploy**: Vercel
 
 ## 📦 설치 및 실행
@@ -90,22 +91,47 @@ npm start
 ai-blog-generator/
 ├── src/
 │   ├── app/
-│   │   ├── api/generate/
-│   │   │   └── route.ts          # OpenAI API 엔드포인트
-│   │   ├── layout.tsx
+│   │   ├── analytics/
+│   │   │   └── page.tsx          # 통계 페이지
+│   │   ├── api/
+│   │   │   ├── analytics/
+│   │   │   │   └── route.ts      # 통계 API
+│   │   │   ├── articles/
+│   │   │   │   └── route.ts      # 글 CRUD API
+│   │   │   ├── auth/
+│   │   │   │   └── [...nextauth]/
+│   │   │   │       └── route.ts  # NextAuth 설정
+│   │   │   └── generate/
+│   │   │       └── route.ts      # GPT-4o 생성 API
+│   │   ├── auth/
+│   │   │   └── signin/
+│   │   │       └── page.tsx      # 로그인 페이지
+│   │   ├── layout.tsx             # 루트 레이아웃
 │   │   ├── page.tsx               # 메인 페이지
-│   │   └── globals.css
+│   │   └── globals.css            # 전역 스타일
 │   ├── components/
 │   │   ├── ui/
-│   │   │   ├── Button.tsx         # 버튼 컴포넌트
-│   │   │   └── Input.tsx          # 입력 컴포넌트
+│   │   │   ├── Button.tsx         # 재사용 버튼
+│   │   │   └── Input.tsx          # 재사용 입력
+│   │   ├── AdvancedSettingsPanel.tsx  # 고급 설정 패널
 │   │   ├── ArticleView.tsx        # 생성된 글 뷰
+│   │   ├── HistorySidebar.tsx     # 히스토리 사이드바
 │   │   ├── KeywordInput.tsx       # 키워드 입력
-│   │   └── ToneSelector.tsx       # 톤 선택기
+│   │   ├── ScrollToTop.tsx        # 맨 위로 버튼
+│   │   ├── SEODashboard.tsx       # SEO 대시보드
+│   │   ├── SessionProvider.tsx    # 세션 프로바이더
+│   │   ├── ToneSelector.tsx       # 톤 선택기
+│   │   └── UserMenu.tsx           # 사용자 메뉴
 │   ├── lib/
+│   │   ├── seo.ts                 # SEO 분석 로직
+│   │   ├── supabase.ts            # Supabase 클라이언트
 │   │   └── utils.ts               # 유틸리티 함수
 │   └── types/
-│       └── index.ts               # 타입 정의
+│       ├── index.ts               # 타입 정의
+│       └── next-auth.d.ts         # NextAuth 타입
+├── public/
+│   ├── favicon.ico                # 파비콘
+│   └── logo.png                   # 로고
 ├── package.json
 ├── tailwind.config.ts
 ├── tsconfig.json
@@ -242,6 +268,13 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ## 📄 라이선스
 
 MIT License
+
+## 📚 추가 문서
+
+- 📖 [PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md) - 프로젝트 전체 정리 (발표/문서용)
+- 📊 [AI_Blog_Generator_Presentation.pptx](./AI_Blog_Generator_Presentation.pptx) - 발표 자료
+- ⚡ [VERCEL_DEPLOY_GUIDE.md](./VERCEL_DEPLOY_GUIDE.md) - 완벽 배포 가이드
+- 🚀 [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) - 5분 빠른 배포
 
 ## 🤝 기여
 
