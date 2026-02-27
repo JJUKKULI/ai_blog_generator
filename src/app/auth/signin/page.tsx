@@ -15,6 +15,17 @@ export default function SignIn() {
       >
         {/* 로고/제목 */}
         <div className="text-center mb-8">
+          {/* 로고 */}
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 flex items-center justify-center">
+              <img 
+                src="/logo.png" 
+                alt="AI Blog Generator" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+          
           <h1 className="text-4xl font-bold text-dark-text mb-2">
             AI 블로그 생성기
           </h1>
